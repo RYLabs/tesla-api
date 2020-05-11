@@ -39,6 +39,7 @@ module TeslaApi
                 heading: attributes[12].to_f
               })
             when 'data:error'
+              logger && logger.error("[err] #{message}");
               task.stop
             end
           end
