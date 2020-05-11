@@ -2,15 +2,15 @@ module TeslaApi
   module Stream
     def stream(logger: nil, &receiver)
       Async do |task|
-        logger && logger.debug("connecting to #{streaming_endpoint}...")
+        logger && logger.info("connecting to #{streaming_endpoint}...")
         Async::WebSocket::Client.connect(streaming_endpoint) do |connection|
           on_timeout = ->(subtask) do
             subtask.sleep TIMEOUT
-            logger && logger.debug('read timeout')
+            logger && logger.warn('read timeout')
             task.stop
           end
 
-          logger && logger.debug("[send] #{streaming_connect_message}")
+          logger && logger.info("[send] #{streaming_connect_message}")
           connection.write(streaming_connect_message)
           timeout = task.async(&on_timeout)
 
@@ -18,7 +18,7 @@ module TeslaApi
             timeout.stop
             timeout = task.async(&on_timeout)
 
-            logger && logger.debug("[recv] #{message}")
+            logger && logger.info("[recv] #{message}")
             case message[:msg_type]
             when 'data:update'
               attributes = message[:value].split(',')
@@ -44,7 +44,7 @@ module TeslaApi
             end
           end
         ensure
-          logger && logger.debug('connection stopped')
+          logger && logger.find('connection stopped')
         end
       end
     end
